@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snooker Score Keeper</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #1e4620 0%, #2d5a2e 50%, #1e4620 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+        }
+
+        .container {
+            background: white;
+            border-radius: 1.5rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 2rem;
+            width: 100%;
+            max-width: 28rem;
+        }
+
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        .icon {
+            text-align: center;
+            font-size: 5rem;
+            margin-bottom: 1.5rem;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+        }
+
+        h1 {
+            text-align: center;
+            color: #1f2937;
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+        }
+
+        h2 {
+            text-align: center;
+            color: #1f2937;
+            font-size: 1.875rem;
+            margin-bottom: 2rem;
+        }
+
+        h3 {
+            color: #1f2937;
+            font-size: 1.125rem;
+            font-weight: bold;
+            margin-bottom: 0.75rem;
+        }
+
+        label {
+            display: block;
+            color: #374151;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 1.125rem;
+        }
+
+        input[type="number"],
+        input[type="text"] {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            border: 2px solid #d1d5db;
+            border-radius: 0.75rem;
+            font-size: 1.5rem;
+            text-align: center;
+            font-weight: 600;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"] {
+            text-align: left;
+            font-size: 1.125rem;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #16a34a;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 1.25rem;
+            border: none;
+            border-radius: 0.75rem;
+            font-size: 1.25rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-primary {
+            background: #15803d;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #166534;
+        }
+
+        .btn-secondary {
+            background: #2563eb;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-secondary:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-danger {
+            background: #dc2626;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            width: auto;
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+        }
+
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+
+        .input-group {
+            margin-bottom: 2rem;
+        }
+
+        .player-inputs {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Game Screen Styles */
+        .game-container {
+            background: linear-gradient(135deg, #1e4620 0%, #2d5a2e 50%, #1e4620 100%);
+            min-height: 100vh;
+            padding: 0;
+            max-width: 100%;
+        }
+
+        .header {
+            position: sticky;
+            top: 0;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+        }
+
+        .header-top {
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .header-top h1 {
+            font-size: 1.25rem;
+            margin: 0;
+        }
+
+        .current-player {
+            padding: 1rem;
+            background: #f0fdf4;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .current-player-label {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-bottom: 0.25rem;
+        }
+
+        .current-player-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .current-player-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #15803d;
+        }
+
+        .break-score {
+            text-align: right;
+        }
+
+        .break-label {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .break-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #15803d;
+        }
+
+        .scoreboard {
+            padding: 1rem;
+            background: white;
+            overflow-x: auto;
+        }
+
+        .score-cards {
+            display: flex;
+            gap: 0.5rem;
+            padding-bottom: 0.5rem;
+        }
+
+        .score-card {
+            flex-shrink: 0;
+            min-width: 120px;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            background: #f3f4f6;
+        }
+
+        .score-card.active {
+            background: #16a34a;
+            color: white;
+        }
+
+        .score-card-name {
+            font-size: 0.875rem;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .score-card-score {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .content {
+            padding: 1rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 1rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .balls-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.5rem;
+        }
+
+        .ball-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .ball-circle {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            border: 2px solid #d1d5db;
+        }
+
+        .ball-count {
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: #374151;
+        }
+
+        .ball-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .ball-btn {
+            padding: 1.5rem;
+            border: 2px solid;
+            border-radius: 1rem;
+            cursor: pointer;
+            transition: transform 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .ball-btn:active {
+            transform: scale(0.95);
+        }
+
+        .ball-btn-circle {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 50%;
+            background: white;
+        }
+
+        .ball-btn-name {
+            color: white;
+            font-weight: bold;
+            font-size: 1.125rem;
+            text-transform: capitalize;
+        }
+
+        .ball-btn-points {
+            color: white;
+            font-weight: bold;
+            font-size: 1.875rem;
+        }
+
+        /* Game Over Styles */
+        .trophy-icon {
+            text-align: center;
+            font-size: 5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .winner-section {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .winner-label {
+            font-size: 1.25rem;
+            color: #374151;
+            margin-bottom: 0.75rem;
+        }
+
+        .winner-name {
+            font-size: 1.875rem;
+            font-weight: bold;
+            color: #15803d;
+            margin-bottom: 2rem;
+        }
+
+        .rankings {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+        }
+
+        .ranking-item {
+            padding: 1.25rem;
+            border-radius: 0.75rem;
+            background: #f3f4f6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .ranking-item.first {
+            background: #fef3c7;
+            border: 2px solid #f59e0b;
+        }
+
+        .ranking-name {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .ranking-score {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #15803d;
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 1.5rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Setup Screen -->
+    <div id="setupScreen" class="screen active">
+        <div class="container">
+            <div class="icon">🎱</div>
+            <h1>Snooker Scorer</h1>
+            <div class="input-group">
+                <label for="numPlayers">Number of Players</label>
+                <input type="number" id="numPlayers" min="2" max="8" value="2" inputmode="numeric">
+            </div>
+            <button class="btn btn-primary" onclick="goToNames()">Next</button>
+        </div>
+    </div>
+
+    <!-- Names Screen -->
+    <div id="namesScreen" class="screen">
+        <div class="container">
+            <h2>Enter Player Names</h2>
+            <div id="playerInputs" class="player-inputs"></div>
+            <button class="btn btn-primary" onclick="startGame()">Start Game</button>
+        </div>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="gameScreen" class="screen">
+        <div class="game-container">
+            <div class="header">
+                <div class="header-top">
+                    <h1>Snooker Match</h1>
+                    <button class="btn-danger" onclick="resetGame()">
+                        <span>↻</span> Reset
+                    </button>
+                </div>
+                <div class="current-player">
+                    <div class="current-player-label">Current Turn</div>
+                    <div class="current-player-info">
+                        <div class="current-player-name" id="currentPlayerName"></div>
+                        <div class="break-score">
+                            <div class="break-label">Break</div>
+                            <div class="break-value" id="currentBreak">0</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="scoreboard">
+                    <div class="score-cards" id="scoreCards"></div>
+                </div>
+            </div>
+
+            <div class="content">
+                <div class="card">
+                    <h3>Balls Left</h3>
+                    <div class="balls-grid" id="ballsGrid"></div>
+                </div>
+
+                <div class="card">
+                    <h3 id="ballSelectionTitle">Pot a Red</h3>
+                    <div class="ball-buttons" id="ballButtons"></div>
+                    <button class="btn btn-secondary" onclick="nextPlayer()">
+                        Next Player →
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Over Screen -->
+    <div id="gameOverScreen" class="screen">
+        <div class="container">
+            <div class="trophy-icon">🏆</div>
+            <h1>Game Over!</h1>
+            <div class="winner-section">
+                <div class="winner-label">🏆 Winner 🏆</div>
+                <div class="winner-name" id="winnerName"></div>
+            </div>
+            <div class="rankings" id="rankings"></div>
+            <button class="btn btn-primary" onclick="resetGame()">New Game</button>
+        </div>
+    </div>
+
+    <script>
+        // Game State
+        let currentScreen = 'setup';
+        let numPlayers = 2;
+        let players = [];
+        let scores = [];
+        let currentPlayerIndex = 0;
+        let currentBreak = 0;
+        let redsPotted = false;
+        let ballsRemaining = {
+            red: 15,
+            yellow: 1,
+            green: 1,
+            brown: 1,
+            blue: 1,
+            pink: 1,
+            black: 1
+        };
+
+        const ballPoints = {
+            red: 1,
+            yellow: 2,
+            green: 3,
+            brown: 4,
+            blue: 5,
+            pink: 6,
+            black: 7
+        };
+
+        const ballColors = {
+            red: '#DC2626',
+            yellow: '#EAB308',
+            green: '#16A34A',
+            brown: '#92400E',
+            blue: '#2563EB',
+            pink: '#EC4899',
+            black: '#1F2937'
+        };
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+            currentScreen = screenId;
+        }
+
+        function goToNames() {
+            numPlayers = parseInt(document.getElementById('numPlayers').value) || 2;
+            if (numPlayers < 2) numPlayers = 2;
+            if (numPlayers > 8) numPlayers = 8;
+
+            const container = document.getElementById('playerInputs');
+            container.innerHTML = '';
+
+            for (let i = 0; i < numPlayers; i++) {
+                const div = document.createElement('div');
+                div.innerHTML = `
+                    <label>Player ${i + 1}</label>
+                    <input type="text" id="player${i}" placeholder="Player ${i + 1}" inputmode="text">
+                `;
+                container.appendChild(div);
+            }
+
+            showScreen('namesScreen');
+        }
+
+        function startGame() {
+            players = [];
+            for (let i = 0; i < numPlayers; i++) {
+                const name = document.getElementById(`player${i}`).value.trim();
+                if (!name) {
+                    alert('Please enter names for all players');
+                    return;
+                }
+                players.push(name);
+            }
+
+            scores = Array(numPlayers).fill(0);
+            currentPlayerIndex = 0;
+            currentBreak = 0;
+            redsPotted = false;
+            ballsRemaining = {
+                red: 15,
+                yellow: 1,
+                green: 1,
+                brown: 1,
+                blue: 1,
+                pink: 1,
+                black: 1
+            };
+
+            showScreen('gameScreen');
+            updateGameUI();
+        }
+
+        function updateGameUI() {
+            // Update current player
+            document.getElementById('currentPlayerName').textContent = players[currentPlayerIndex];
+            document.getElementById('currentBreak').textContent = currentBreak;
+
+            // Update score cards
+            const scoreCardsContainer = document.getElementById('scoreCards');
+            scoreCardsContainer.innerHTML = '';
+            players.forEach((player, index) => {
+                const card = document.createElement('div');
+                card.className = 'score-card' + (index === currentPlayerIndex ? ' active' : '');
+                card.innerHTML = `
+                    <div class="score-card-name">${player}</div>
+                    <div class="score-card-score">${scores[index]}</div>
+                `;
+                scoreCardsContainer.appendChild(card);
+            });
+
+            // Update balls grid
+            const ballsGrid = document.getElementById('ballsGrid');
+            ballsGrid.innerHTML = '';
+            Object.entries(ballsRemaining).forEach(([color, count]) => {
+                const item = document.createElement('div');
+                item.className = 'ball-item';
+                item.innerHTML = `
+                    <div class="ball-circle" style="background-color: ${ballColors[color]}"></div>
+                    <div class="ball-count">${count}</div>
+                `;
+                ballsGrid.appendChild(item);
+            });
+
+            // Update available balls
+            const availableBalls = getAvailableBalls();
+            const ballButtons = document.getElementById('ballButtons');
+            ballButtons.innerHTML = '';
+
+            const title = document.getElementById('ballSelectionTitle');
+            if (redsPotted) {
+                title.textContent = 'Pot a Color';
+            } else if (ballsRemaining.red > 0) {
+                title.textContent = 'Pot a Red';
+            } else {
+                title.textContent = 'Pot in Order';
+            }
+
+            availableBalls.forEach(color => {
+                const btn = document.createElement('button');
+                btn.className = 'ball-btn';
+                btn.style.backgroundColor = ballColors[color];
+                btn.style.borderColor = ballColors[color];
+                btn.onclick = () => potBall(color);
+                btn.innerHTML = `
+                    <div class="ball-btn-circle" style="background-color: white"></div>
+                    <div class="ball-btn-name">${color}</div>
+                    <div class="ball-btn-points">${ballPoints[color]}</div>
+                `;
+                ballButtons.appendChild(btn);
+            });
+        }
+
+        function getAvailableBalls() {
+            if (ballsRemaining.red > 0) {
+                if (redsPotted) {
+                    return ['yellow', 'green', 'brown', 'blue', 'pink', 'black'].filter(
+                        color => ballsRemaining[color] > 0
+                    );
+                } else {
+                    return ['red'];
+                }
+            } else {
+                const colorOrder = ['yellow', 'green', 'brown', 'blue', 'pink', 'black'];
+                for (let color of colorOrder) {
+                    if (ballsRemaining[color] > 0) {
+                        return [color];
+                    }
+                }
+                return [];
+            }
+        }
+
+        function potBall(color) {
+            if (ballsRemaining[color] === 0) return;
+
+            scores[currentPlayerIndex] += ballPoints[color];
+            ballsRemaining[color]--;
+            currentBreak += ballPoints[color];
+
+            if (color === 'red') {
+                redsPotted = true;
+            } else if (redsPotted && ballsRemaining.red > 0) {
+                if (color !== 'red') {
+                    ballsRemaining[color]++;
+                }
+                redsPotted = false;
+            }
+
+            const totalBalls = Object.values(ballsRemaining).reduce((a, b) => a + b, 0);
+            if (totalBalls === 0) {
+                showGameOver();
+                return;
+            }
+
+            updateGameUI();
+        }
+
+        function nextPlayer() {
+            currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
+            redsPotted = false;
+            currentBreak = 0;
+            updateGameUI();
+        }
+
+        function showGameOver() {
+            const winnerIndex = scores.indexOf(Math.max(...scores));
+            document.getElementById('winnerName').textContent = players[winnerIndex];
+
+            const sortedPlayers = players
+                .map((name, index) => ({ name, score: scores[index] }))
+                .sort((a, b) => b.score - a.score);
+
+            const rankings = document.getElementById('rankings');
+            rankings.innerHTML = '';
+            sortedPlayers.forEach((player, index) => {
+                const item = document.createElement('div');
+                item.className = 'ranking-item' + (index === 0 ? ' first' : '');
+                item.innerHTML = `
+                    <div class="ranking-name">${index + 1}. ${player.name}</div>
+                    <div class="ranking-score">${player.score}</div>
+                `;
+                rankings.appendChild(item);
+            });
+
+            showScreen('gameOverScreen');
+        }
+
+        function resetGame() {
+            showScreen('setupScreen');
+            document.getElementById('numPlayers').value = 2;
+            numPlayers = 2;
+            players = [];
+            scores = [];
+            currentPlayerIndex = 0;
+            currentBreak = 0;
+            redsPotted = false;
+            ballsRemaining = {
+                red: 15,
+                yellow: 1,
+                green: 1,
+                brown: 1,
+                blue: 1,
+                pink: 1,
+                black: 1
+            };
+        }
+
+        // Handle input blur
+        document.addEventListener('DOMContentLoaded', () => {
+            const numPlayersInput = document.getElementById('numPlayers');
+            numPlayersInput.addEventListener('blur', (e) => {
+                if (e.target.value === '' || parseInt(e.target.value) < 2) {
+                    e.target.value = 2;
+                }
+            });
+        });
+    </script>
+</body>
+</html>
