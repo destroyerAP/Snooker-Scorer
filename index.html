@@ -589,6 +589,7 @@
         let currentBreak = 0;
         let redsPotted = false;
         let mustPotRed = true; // New flag to track if player must pot red next
+        let finalColorSequence = false; // Flag to track if we're in final color sequence
         let ballsRemaining = {
             red: 15,
             yellow: 1,
@@ -666,6 +667,7 @@
             currentBreak = 0;
             redsPotted = false;
             mustPotRed = true;
+            finalColorSequence = false;
             ballsRemaining = {
                 red: 15,
                 yellow: 1,
@@ -717,14 +719,16 @@
             ballButtons.innerHTML = '';
 
             const title = document.getElementById('ballSelectionTitle');
-            if (ballsRemaining.red > 0) {
+            if (finalColorSequence) {
+                title.textContent = 'Pot Colors in Order';
+            } else if (ballsRemaining.red > 0) {
                 if (mustPotRed) {
                     title.textContent = 'Pot a Red';
                 } else {
                     title.textContent = 'Pot Red or Any Color';
                 }
             } else {
-                title.textContent = 'Pot in Order';
+                title.textContent = 'Choose Any Color';
             }
 
             availableBalls.forEach(color => {
@@ -743,6 +747,18 @@
         }
 
         function getAvailableBalls() {
+            // Check if we're in final color sequence (all reds gone and we've potted the bonus color)
+            if (finalColorSequence) {
+                const colorOrder = ['yellow', 'green', 'brown', 'blue', 'pink', 'black'];
+                for (let color of colorOrder) {
+                    if (ballsRemaining[color] > 0) {
+                        return [color];
+                    }
+                }
+                return [];
+            }
+
+            // If reds are still available
             if (ballsRemaining.red > 0) {
                 if (mustPotRed) {
                     // Must pot red first
@@ -758,14 +774,10 @@
                     return available;
                 }
             } else {
-                // All reds gone, pot colors in order
-                const colorOrder = ['yellow', 'green', 'brown', 'blue', 'pink', 'black'];
-                for (let color of colorOrder) {
-                    if (ballsRemaining[color] > 0) {
-                        return [color];
-                    }
-                }
-                return [];
+                // All reds gone, player gets one free choice of any color
+                return ['yellow', 'green', 'brown', 'blue', 'pink', 'black'].filter(
+                    color => ballsRemaining[color] > 0
+                );
             }
         }
 
@@ -773,20 +785,44 @@
             if (ballsRemaining[color] === 0) return;
 
             scores[currentPlayerIndex] += ballPoints[color];
-            ballsRemaining[color]--;
             currentBreak += ballPoints[color];
 
             if (color === 'red') {
+                // Pot red, decrease count
+                ballsRemaining[color]--;
                 // After potting red, player can pot red again or any color
                 mustPotRed = false;
             } else {
-                // After potting a color (not red), respotted it and must pot red next
-                if (ballsRemaining.red > 0) {
-                    ballsRemaining[color]++;
+                // Potted a color
+                const redsStillOnTable = ballsRemaining.red > 0;
+                
+                if (redsStillOnTable) {
+                    // Still reds left, color is respotted (don't decrease count)
+                    // Color stays on table, must pot red next
+                    mustPotRed = true;
+                } else {
+                    // No reds left
+                    if (!finalColorSequence) {
+                        // This is the bonus color after last red
+                        // This color gets potted but we need to restore all colors for final sequence
+                        finalColorSequence = true;
+                        
+                        // Restore all colors to 1 for the final sequence
+                        ballsRemaining.yellow = 1;
+                        ballsRemaining.green = 1;
+                        ballsRemaining.brown = 1;
+                        ballsRemaining.blue = 1;
+                        ballsRemaining.pink = 1;
+                        ballsRemaining.black = 1;
+                    } else {
+                        // In final sequence, just pot the color normally
+                        ballsRemaining[color]--;
+                    }
+                    mustPotRed = false;
                 }
-                mustPotRed = true;
             }
 
+            // Check if game is over AFTER updating ball counts
             const totalBalls = Object.values(ballsRemaining).reduce((a, b) => a + b, 0);
             if (totalBalls === 0) {
                 showGameOver();
@@ -801,6 +837,7 @@
             redsPotted = false;
             mustPotRed = true; // Reset: next player must start with red
             currentBreak = 0;
+            // Don't reset finalColorSequence - it stays true once triggered
             updateGameUI();
         }
 
@@ -838,6 +875,7 @@
                 currentBreak = 0;
                 redsPotted = false;
                 mustPotRed = true;
+                finalColorSequence = false;
                 ballsRemaining = {
                     red: 15,
                     yellow: 1,
