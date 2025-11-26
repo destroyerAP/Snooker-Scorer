@@ -2,66 +2,75 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <title>Snooker Score Keeper</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             background: linear-gradient(135deg, #1e4620 0%, #2d5a2e 50%, #1e4620 100%);
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 1.5rem;
+            position: relative;
+            overflow-x: hidden;
         }
 
         .container {
             background: white;
             border-radius: 1.5rem;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            padding: 2rem;
-            width: 100%;
+            padding: 2rem 1.5rem;
+            width: calc(100% - 2rem);
             max-width: 28rem;
+            margin: 1rem auto;
         }
 
         .screen {
             display: none;
+            min-height: 100vh;
+            padding: 1rem;
         }
 
         .screen.active {
-            display: block;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .icon {
             text-align: center;
-            font-size: 5rem;
+            font-size: 4.5rem;
             margin-bottom: 1.5rem;
             filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+            line-height: 1;
         }
 
         h1 {
             text-align: center;
             color: #1f2937;
-            font-size: 2.5rem;
+            font-size: clamp(1.75rem, 5vw, 2.5rem);
             margin-bottom: 2rem;
+            line-height: 1.2;
         }
 
         h2 {
             text-align: center;
             color: #1f2937;
-            font-size: 1.875rem;
+            font-size: clamp(1.5rem, 4vw, 1.875rem);
             margin-bottom: 2rem;
+            line-height: 1.2;
         }
 
         h3 {
             color: #1f2937;
-            font-size: 1.125rem;
+            font-size: clamp(1rem, 3vw, 1.125rem);
             font-weight: bold;
             margin-bottom: 0.75rem;
         }
@@ -70,25 +79,27 @@
             display: block;
             color: #374151;
             font-weight: 600;
-            margin-bottom: 0.5rem;
-            font-size: 1.125rem;
+            margin-bottom: 0.75rem;
+            font-size: clamp(1rem, 3vw, 1.125rem);
         }
 
         input[type="number"],
         input[type="text"] {
             width: 100%;
-            padding: 1rem 1.5rem;
+            padding: 1.25rem;
             border: 2px solid #d1d5db;
             border-radius: 0.75rem;
-            font-size: 1.5rem;
+            font-size: clamp(1.25rem, 4vw, 1.5rem);
             text-align: center;
             font-weight: 600;
             transition: border-color 0.3s;
+            -webkit-appearance: none;
+            appearance: none;
         }
 
         input[type="text"] {
             text-align: left;
-            font-size: 1.125rem;
+            font-size: clamp(1rem, 3vw, 1.125rem);
         }
 
         input:focus {
@@ -101,15 +112,16 @@
             padding: 1.25rem;
             border: none;
             border-radius: 0.75rem;
-            font-size: 1.25rem;
+            font-size: clamp(1.125rem, 3.5vw, 1.25rem);
             font-weight: bold;
             cursor: pointer;
             transition: all 0.2s;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            touch-action: manipulation;
         }
 
         .btn:active {
-            transform: scale(0.98);
+            transform: scale(0.97);
         }
 
         .btn-primary {
@@ -137,17 +149,21 @@
         .btn-danger {
             background: #dc2626;
             color: white;
-            display: flex;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
             gap: 0.5rem;
-            width: auto;
-            padding: 0.5rem 1rem;
-            font-size: 1rem;
+            padding: 0.75rem 1.25rem;
+            font-size: clamp(0.875rem, 2.5vw, 1rem);
+            border-radius: 0.5rem;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            touch-action: manipulation;
         }
 
-        .btn-danger:hover {
-            background: #b91c1c;
+        .btn-danger:active {
+            transform: scale(0.97);
         }
 
         .input-group {
@@ -157,16 +173,18 @@
         .player-inputs {
             display: flex;
             flex-direction: column;
-            gap: 1.25rem;
+            gap: 1.5rem;
             margin-bottom: 2rem;
+            max-height: calc(100vh - 250px);
+            overflow-y: auto;
         }
 
         /* Game Screen Styles */
         .game-container {
             background: linear-gradient(135deg, #1e4620 0%, #2d5a2e 50%, #1e4620 100%);
             min-height: 100vh;
+            width: 100%;
             padding: 0;
-            max-width: 100%;
         }
 
         .header {
@@ -174,7 +192,8 @@
             top: 0;
             background: white;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            z-index: 10;
+            z-index: 100;
+            width: 100%;
         }
 
         .header-top {
@@ -186,8 +205,9 @@
         }
 
         .header-top h1 {
-            font-size: 1.25rem;
+            font-size: clamp(1.125rem, 4vw, 1.5rem);
             margin: 0;
+            text-align: left;
         }
 
         .current-player {
@@ -197,7 +217,7 @@
         }
 
         .current-player-label {
-            font-size: 0.875rem;
+            font-size: clamp(0.75rem, 2.5vw, 0.875rem);
             color: #6b7280;
             margin-bottom: 0.25rem;
         }
@@ -206,25 +226,29 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 1rem;
         }
 
         .current-player-name {
-            font-size: 1.5rem;
+            font-size: clamp(1.25rem, 5vw, 1.75rem);
             font-weight: bold;
             color: #15803d;
+            flex: 1;
+            word-break: break-word;
         }
 
         .break-score {
             text-align: right;
+            flex-shrink: 0;
         }
 
         .break-label {
-            font-size: 0.875rem;
+            font-size: clamp(0.75rem, 2.5vw, 0.875rem);
             color: #6b7280;
         }
 
         .break-value {
-            font-size: 1.5rem;
+            font-size: clamp(1.25rem, 5vw, 1.75rem);
             font-weight: bold;
             color: #15803d;
         }
@@ -233,42 +257,48 @@
             padding: 1rem;
             background: white;
             overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         .score-cards {
             display: flex;
-            gap: 0.5rem;
+            gap: 0.75rem;
             padding-bottom: 0.5rem;
+            min-width: min-content;
         }
 
         .score-card {
             flex-shrink: 0;
-            min-width: 120px;
-            padding: 0.75rem 1rem;
-            border-radius: 0.5rem;
+            min-width: 110px;
+            padding: 1rem;
+            border-radius: 0.75rem;
             background: #f3f4f6;
+            transition: all 0.3s;
         }
 
         .score-card.active {
             background: #16a34a;
             color: white;
+            transform: scale(1.05);
         }
 
         .score-card-name {
-            font-size: 0.875rem;
+            font-size: clamp(0.875rem, 2.5vw, 1rem);
             font-weight: 600;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            margin-bottom: 0.25rem;
         }
 
         .score-card-score {
-            font-size: 1.5rem;
+            font-size: clamp(1.5rem, 5vw, 2rem);
             font-weight: bold;
         }
 
         .content {
             padding: 1rem;
+            padding-bottom: 2rem;
         }
 
         .card {
@@ -281,48 +311,52 @@
 
         .balls-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 0.5rem;
+            grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+            gap: 0.75rem;
+            justify-items: center;
         }
 
         .ball-item {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 0.25rem;
+            gap: 0.5rem;
         }
 
         .ball-circle {
-            width: 2rem;
-            height: 2rem;
+            width: clamp(2rem, 8vw, 2.5rem);
+            height: clamp(2rem, 8vw, 2.5rem);
             border-radius: 50%;
             border: 2px solid #d1d5db;
         }
 
         .ball-count {
-            font-size: 0.75rem;
+            font-size: clamp(0.875rem, 3vw, 1rem);
             font-weight: bold;
             color: #374151;
         }
 
         .ball-buttons {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 0.75rem;
-            margin-bottom: 1rem;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.25rem;
         }
 
         .ball-btn {
-            padding: 1.5rem;
-            border: 2px solid;
+            padding: 1.5rem 1rem;
+            border: 3px solid;
             border-radius: 1rem;
             cursor: pointer;
             transition: transform 0.2s;
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
             gap: 0.5rem;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            touch-action: manipulation;
+            min-height: 140px;
         }
 
         .ball-btn:active {
@@ -330,30 +364,34 @@
         }
 
         .ball-btn-circle {
-            width: 3rem;
-            height: 3rem;
+            width: clamp(2.5rem, 10vw, 3.5rem);
+            height: clamp(2.5rem, 10vw, 3.5rem);
             border-radius: 50%;
             background: white;
+            border: 2px solid rgba(255, 255, 255, 0.5);
         }
 
         .ball-btn-name {
             color: white;
             font-weight: bold;
-            font-size: 1.125rem;
+            font-size: clamp(1rem, 3.5vw, 1.25rem);
             text-transform: capitalize;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
         }
 
         .ball-btn-points {
             color: white;
             font-weight: bold;
-            font-size: 1.875rem;
+            font-size: clamp(1.75rem, 6vw, 2.25rem);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
         }
 
         /* Game Over Styles */
         .trophy-icon {
             text-align: center;
-            font-size: 5rem;
+            font-size: clamp(4rem, 15vw, 6rem);
             margin-bottom: 1.5rem;
+            line-height: 1;
         }
 
         .winner-section {
@@ -362,16 +400,17 @@
         }
 
         .winner-label {
-            font-size: 1.25rem;
+            font-size: clamp(1.125rem, 4vw, 1.5rem);
             color: #374151;
             margin-bottom: 0.75rem;
         }
 
         .winner-name {
-            font-size: 1.875rem;
+            font-size: clamp(1.75rem, 6vw, 2.5rem);
             font-weight: bold;
             color: #15803d;
             margin-bottom: 2rem;
+            word-break: break-word;
         }
 
         .rankings {
@@ -388,6 +427,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 1rem;
         }
 
         .ranking-item.first {
@@ -396,28 +436,66 @@
         }
 
         .ranking-name {
-            font-size: 1.125rem;
+            font-size: clamp(1rem, 3.5vw, 1.25rem);
             font-weight: 600;
             color: #1f2937;
+            flex: 1;
+            word-break: break-word;
         }
 
         .ranking-score {
-            font-size: 1.5rem;
+            font-size: clamp(1.5rem, 5vw, 2rem);
             font-weight: bold;
             color: #15803d;
+            flex-shrink: 0;
         }
 
-        @media (max-width: 640px) {
+        /* Smooth scrolling */
+        * {
+            scroll-behavior: smooth;
+        }
+
+        /* Prevent zoom on input focus (iOS) */
+        @supports (-webkit-touch-callout: none) {
+            input[type="text"],
+            input[type="number"] {
+                font-size: 16px;
+            }
+        }
+
+        /* Small phone optimization */
+        @media (max-width: 380px) {
             .container {
-                padding: 1.5rem;
+                padding: 1.5rem 1rem;
             }
 
-            h1 {
-                font-size: 2rem;
+            .ball-buttons {
+                grid-template-columns: 1fr;
             }
 
-            h2 {
-                font-size: 1.5rem;
+            .balls-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        /* Landscape optimization */
+        @media (max-height: 600px) and (orientation: landscape) {
+            .screen {
+                padding: 0.5rem;
+            }
+
+            .container {
+                margin: 0.5rem auto;
+                padding: 1.5rem 1rem;
+            }
+
+            .icon {
+                font-size: 3rem;
+                margin-bottom: 1rem;
+            }
+
+            h1, h2 {
+                margin-bottom: 1rem;
             }
         }
     </style>
@@ -510,6 +588,7 @@
         let currentPlayerIndex = 0;
         let currentBreak = 0;
         let redsPotted = false;
+        let mustPotRed = true; // New flag to track if player must pot red next
         let ballsRemaining = {
             red: 15,
             yellow: 1,
@@ -564,6 +643,11 @@
             }
 
             showScreen('namesScreen');
+            
+            // Focus first input after a short delay
+            setTimeout(() => {
+                document.getElementById('player0')?.focus();
+            }, 100);
         }
 
         function startGame() {
@@ -581,6 +665,7 @@
             currentPlayerIndex = 0;
             currentBreak = 0;
             redsPotted = false;
+            mustPotRed = true;
             ballsRemaining = {
                 red: 15,
                 yellow: 1,
@@ -632,10 +717,12 @@
             ballButtons.innerHTML = '';
 
             const title = document.getElementById('ballSelectionTitle');
-            if (redsPotted) {
-                title.textContent = 'Pot a Color';
-            } else if (ballsRemaining.red > 0) {
-                title.textContent = 'Pot a Red';
+            if (ballsRemaining.red > 0) {
+                if (mustPotRed) {
+                    title.textContent = 'Pot a Red';
+                } else {
+                    title.textContent = 'Pot Red or Any Color';
+                }
             } else {
                 title.textContent = 'Pot in Order';
             }
@@ -647,7 +734,7 @@
                 btn.style.borderColor = ballColors[color];
                 btn.onclick = () => potBall(color);
                 btn.innerHTML = `
-                    <div class="ball-btn-circle" style="background-color: white"></div>
+                    <div class="ball-btn-circle"></div>
                     <div class="ball-btn-name">${color}</div>
                     <div class="ball-btn-points">${ballPoints[color]}</div>
                 `;
@@ -657,14 +744,21 @@
 
         function getAvailableBalls() {
             if (ballsRemaining.red > 0) {
-                if (redsPotted) {
-                    return ['yellow', 'green', 'brown', 'blue', 'pink', 'black'].filter(
-                        color => ballsRemaining[color] > 0
-                    );
-                } else {
+                if (mustPotRed) {
+                    // Must pot red first
                     return ['red'];
+                } else {
+                    // After potting red, can pot another red or any color
+                    const available = ['red'];
+                    ['yellow', 'green', 'brown', 'blue', 'pink', 'black'].forEach(color => {
+                        if (ballsRemaining[color] > 0) {
+                            available.push(color);
+                        }
+                    });
+                    return available;
                 }
             } else {
+                // All reds gone, pot colors in order
                 const colorOrder = ['yellow', 'green', 'brown', 'blue', 'pink', 'black'];
                 for (let color of colorOrder) {
                     if (ballsRemaining[color] > 0) {
@@ -683,12 +777,14 @@
             currentBreak += ballPoints[color];
 
             if (color === 'red') {
-                redsPotted = true;
-            } else if (redsPotted && ballsRemaining.red > 0) {
-                if (color !== 'red') {
+                // After potting red, player can pot red again or any color
+                mustPotRed = false;
+            } else {
+                // After potting a color (not red), respotted it and must pot red next
+                if (ballsRemaining.red > 0) {
                     ballsRemaining[color]++;
                 }
-                redsPotted = false;
+                mustPotRed = true;
             }
 
             const totalBalls = Object.values(ballsRemaining).reduce((a, b) => a + b, 0);
@@ -703,6 +799,7 @@
         function nextPlayer() {
             currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
             redsPotted = false;
+            mustPotRed = true; // Reset: next player must start with red
             currentBreak = 0;
             updateGameUI();
         }
@@ -731,23 +828,26 @@
         }
 
         function resetGame() {
-            showScreen('setupScreen');
-            document.getElementById('numPlayers').value = 2;
-            numPlayers = 2;
-            players = [];
-            scores = [];
-            currentPlayerIndex = 0;
-            currentBreak = 0;
-            redsPotted = false;
-            ballsRemaining = {
-                red: 15,
-                yellow: 1,
-                green: 1,
-                brown: 1,
-                blue: 1,
-                pink: 1,
-                black: 1
-            };
+            if (confirm('Are you sure you want to reset the game?')) {
+                showScreen('setupScreen');
+                document.getElementById('numPlayers').value = 2;
+                numPlayers = 2;
+                players = [];
+                scores = [];
+                currentPlayerIndex = 0;
+                currentBreak = 0;
+                redsPotted = false;
+                mustPotRed = true;
+                ballsRemaining = {
+                    red: 15,
+                    yellow: 1,
+                    green: 1,
+                    brown: 1,
+                    blue: 1,
+                    pink: 1,
+                    black: 1
+                };
+            }
         }
 
         // Handle input blur
@@ -758,6 +858,14 @@
                     e.target.value = 2;
                 }
             });
+        });
+
+        // Prevent accidental page refresh
+        window.addEventListener('beforeunload', (e) => {
+            if (currentScreen === 'gameScreen') {
+                e.preventDefault();
+                e.returnValue = '';
+            }
         });
     </script>
 </body>
